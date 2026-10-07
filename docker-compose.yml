@@ -1,0 +1,56 @@
+# Full stack in one command:  docker compose up --build
+#   storefront  http://localhost:8080      API  http://localhost:4000/api      ML  http://localhost:8000/docs
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cartpilot
+      POSTGRES_PASSWORD: cartpilot
+      POSTGRES_DB: cartpilot
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cartpilot"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: ./backend
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://cartpilot:cartpilot@db:5432/cartpilot
+      JWT_SECRET: ${JWT_SECRET:-local-docker-secret-change-me}
+      ML_SERVICE_URL: http://ml:8000
+      CORS_ORIGIN: http://localhost:8080
+      FRONTEND_URL: http://localhost:8080
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+    ports:
+      - "4000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  ml:
+    build: ./ml
+    environment:
+      DATABASE_URL: postgresql://cartpilot:cartpilot@db:5432/cartpilot
+      SEED_ON_START: "true" # loads the synthetic dataset once the API has migrated an empty database
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:

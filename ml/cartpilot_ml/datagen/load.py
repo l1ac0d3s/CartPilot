@@ -22,6 +22,16 @@ def _copy(cur, table: str, columns: list[str], rows):
             copy.write_row(row)
 
 
+def database_state(url: str) -> str:
+    """'missing-schema', 'empty' or 'seeded'."""
+    with psycopg.connect(url) as conn, conn.cursor() as cur:
+        cur.execute("SELECT to_regclass('public.orders') IS NOT NULL")
+        if not cur.fetchone()[0]:
+            return "missing-schema"
+        cur.execute("SELECT EXISTS (SELECT 1 FROM orders)")
+        return "seeded" if cur.fetchone()[0] else "empty"
+
+
 def load(dataset: Dataset, url: str, reset: bool = False) -> None:
     customer_hash = bcrypt.hashpw(DEMO_PASSWORD.encode(), bcrypt.gensalt(10)).decode()
     admin_hash = bcrypt.hashpw(ADMIN_PASSWORD.encode(), bcrypt.gensalt(10)).decode()
