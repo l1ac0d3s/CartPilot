@@ -34,7 +34,8 @@ QUERIES = {
           FROM orders""",
     "items": "SELECT order_id, product_id, quantity, price::float8 FROM order_items",
     "products": """
-        SELECT p.id, p.sku, p.name, p.brand, p.category_id, c.name AS category, p.price::float8,
+        SELECT p.id, p.sku, p.brand, p.category_id, c.name AS category, p.price::float8,
+               CASE WHEN p.unit IS NULL THEN p.name ELSE p.name || ' · ' || p.unit END AS name,
                COALESCE(p.cost_price, p.price * 0.75)::float8 AS cost_price, p.stock, p.reorder_level,
                p.max_stock, p.is_available
           FROM products p JOIN categories c ON c.id = p.category_id
