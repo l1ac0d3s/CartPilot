@@ -1,0 +1,47 @@
+{
+  "name": "cartpilot-backend",
+  "version": "1.0.0",
+  "description": "CartPilot REST API: auth, catalog, cart, checkout, orders, inventory, payments",
+  "main": "src/server.js",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "migrate": "node src/db/migrate.js",
+    "create-admin": "node scripts/create-admin.js",
+    "test": "jest --runInBand",
+    "lint": "eslint src tests"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 20000,
+    "setupFiles": [
+      "<rootDir>/tests/env.js"
+    ],
+    "globalSetup": "<rootDir>/tests/globalSetup.js",
+    "maxWorkers": 1
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.6",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.12.1",
+    "pg": "^8.23.1",
+    "stripe": "^23.0.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
+    "jest": "^30.5.2",
+    "supertest": "^7.3.1"
+  }
+}
